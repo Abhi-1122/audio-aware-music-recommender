@@ -34,25 +34,9 @@ Full write-up: [report.md](report.md). Notebooks with every chart: [notebooks/](
 
 ## Architecture
 
-```
- raw logs (parquet) ──► DuckDB SQL pipeline ──► history · labels · features   (per cutoff, leakage-checked)
-                                │
-           ┌────────────────────┼───────────────────────────────────────┐
-           ▼                    ▼                    ▼                  ▼
-   two-tower (PyTorch)    ALS (implicit)     audio profile (CNN    popularity / repeat
-   ID + artist + audio    matrix factor.     embeddings)           lists and lookups
-           │                    │                    │                  │
-           └──── FAISS exact inner-product search ───┘                  │
-                                │                                       │
-                                ▼                                       ▼
-                   STAGE 1: merge ≤ 500 candidates per user (per-source quotas)
-                                │
-                                ▼
-         STAGE 2: LightGBM LambdaRank · 45 features · graded labels (dislike < none < listen < like)
-                                │
-                                ▼
-            top-100 per user ──► offline metrics (all / discovery / cold)  ──► FastAPI service
-```
+![Two-stage architecture: DuckDB data pipeline, five retrieval sources with FAISS search, candidate merge, LightGBM LambdaRank, offline evaluation and FastAPI serving](docs/architecture.png)
+
+Full-size image: [`docs/architecture.png`](docs/architecture.png).
 
 ## Results
 
@@ -124,6 +108,7 @@ src/yrec/
   serve.py           FastAPI prototype + latency benchmark
 notebooks/           01_eda · 02_retrieval_sources · 03_two_tower · 04_retrieve_and_rank · 05_ablations
 results/             every metric reported above, as JSON
+docs/                architecture diagram (TikZ source, SVG, PNG)
 Makefile             pipeline targets (`make help`)
 job.sbatch           Slurm wrapper that runs one make target on a cluster node
 ```
