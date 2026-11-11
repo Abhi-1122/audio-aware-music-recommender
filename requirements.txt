@@ -10,7 +10,6 @@ threadpoolctl==3.6.0
 implicit==0.7.3
 faiss-cpu==1.15.1
 lightgbm==4.7.0
-huggingface_hub==1.6.0
 fastapi==0.138.2
 uvicorn==0.49.0
 matplotlib==3.10.8
