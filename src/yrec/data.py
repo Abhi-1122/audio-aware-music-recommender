@@ -65,10 +65,10 @@ def audio(src):
     import duckdb, numpy as np
     con = duckdb.connect()
     t = con.sql(f"""SELECT i.idx, e.normalized_embed AS v
-                    FROM read_parquet('{src}') e JOIN read_parquet('{PROC}/items.parquet') i USING (item_id)""").arrow()
+                    FROM read_parquet('{src}') e JOIN read_parquet('{PROC}/items.parquet') i USING (item_id)""").df()
     n = con.sql(f"SELECT count(*) FROM '{PROC}/items.parquet'").fetchone()[0]
     out = np.zeros((n, 128), np.float16)
-    out[t["idx"].to_numpy()] = np.stack(t["v"].to_numpy(zero_copy_only=False)).astype(np.float16)
+    out[t.idx.to_numpy()] = np.stack(t.v.to_numpy()).astype(np.float16)
     np.save(PROC / "audio.npy", out)
     write_items()
 
