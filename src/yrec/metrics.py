@@ -1,10 +1,13 @@
-"""Recall@K, NDCG@K, catalogue Coverage@K and stage-1 candidate recall, in two evaluation views.
+"""Evaluation shared by every stage: Recall@K, NDCG@K, catalogue Coverage@K and stage-1 candidate recall.
 
 Views (targets are Listen+ (user, track) pairs in the window after a cutoff):
   all       - every Listen+ track; rankings may contain tracks the user already knows
   discovery - only tracks the user never played before the cutoff; rankings must exclude history
+
+  PYTHONPATH=src python -m yrec.metrics    # self-check on toy data (also run by `make data`)
 """
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -48,7 +51,7 @@ def candidate_recall(cands, tgts):
 
 
 def save(name, res, path="results"):
-    from pathlib import Path
+    """Write results/<name>.json and print the flattened metrics."""
     Path(path).mkdir(exist_ok=True)
     Path(path, f"{name}.json").write_text(json.dumps(res, indent=2))
     print(name, {k: round(v, 4) if isinstance(v, float) else v for k, v in flatten(res).items()}, flush=True)

@@ -1,4 +1,11 @@
-"""Data pipeline: raw Yambda-50M parquet -> processed tables under DATA_DIR/proc.
+"""Data pipeline (first step): raw Yambda-50M parquet -> processed tables under DATA_DIR/proc.
+
+Runs sql/01_load.sql once, then sql/02_split.sql and sql/03_features.sql for each history cutoff.
+Raw input: the flat 50M parquet files of the Hugging Face dataset yandex/yambda in DATA_DIR/raw.
+
+  PYTHONPATH=src python -m yrec.data build                               # users, items, events, hist / tgt / features
+  PYTHONPATH=src python -m yrec.data audio data/raw/embeddings.parquet   # audio.npy, refreshes items.has_audio
+  PYTHONPATH=src python -m yrec.data items                               # rewrite items.parquet only
 
 Time windows (seconds; the official Yambda split with 30-minute gaps):
   A  = [0, A_END)            retrievers for the ranker's training period
@@ -23,6 +30,7 @@ SQL = Path(__file__).resolve().parents[2] / "sql"
 
 
 def run_sql(con, name, **params):
+    """Execute sql/<name> with its {placeholders} (raw, proc and params) filled in."""
     sql = (SQL / name).read_text().format(raw=RAW, proc=PROC, **params)
     con.execute(sql)
 
@@ -61,7 +69,7 @@ def write_items(con=None):
 
 
 def audio(src):
-    """Filter the 13.8 GB global embeddings file to our tracks -> audio.npy (n_items, 128) float16."""
+    """Filter the 13.8 GB global embeddings file to the catalogue's tracks -> audio.npy (n_items, 128) float16."""
     import duckdb, numpy as np
     con = duckdb.connect()
     t = con.sql(f"""SELECT i.idx, e.normalized_embed AS v

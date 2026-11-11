@@ -1,4 +1,5 @@
-"""Stage-1 retrieval sources. Each returns user and item vectors (searched with FAISS) or ranked lists.
+"""Stage-1 retrieval sources, fitted on the history before a cutoff. Library module, used by retrieval.py
+and serve.py. Each source returns user and item vectors (searched with FAISS) or ranked lists.
 
   popularity - fixed top-N list by plays in the last 7 days before the cutoff
   repeat     - the user's own tracks, by recency-weighted Listen+ count (a lookup, no search)
@@ -10,9 +11,7 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 
-from yrec.data import CUTOFFS, PROC
-
-DAY = 86_400
+from yrec.data import CUTOFFS, DAY, PROC
 
 
 def load(cut):

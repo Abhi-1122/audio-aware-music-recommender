@@ -1,8 +1,11 @@
-plan.md
+# local data, model outputs and logs (results/ is tracked)
 data/
-logs/
 artifacts/
+logs/
+*.pt
+plan.md
+
+# caches
 __pycache__/
 .ipynb_checkpoints/
-*.pt
-.venv/
+.*_cache/

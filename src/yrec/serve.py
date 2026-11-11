@@ -1,4 +1,5 @@
-"""Online prototype of the two-stage recommender, serving the state right before the test day (cut AB).
+"""Online prototype of the two-stage recommender (last step), serving the state right before the test day (cut AB).
+Needs artifacts/tt_AB and the rankers from `make rank`; caches the ALS factors in artifacts/als_AB.npz.
 
   stage 1: per-source FAISS retrieval (two-tower, ALS, audio) + popularity + repeat, same quotas as retrieval.py
   stage 2: LightGBM LambdaRank over the same features as ranker.py
@@ -40,7 +41,7 @@ def user_rows(uidx, n_users):
 def load(artifacts=ARTIFACTS, tt_dir=TT_DIR):
     t0 = time.time()
     boosters = {v: lgb.Booster(model_file=str(Path(artifacts, f"ranker_{v}.txt"))) for v in VIEWS}
-    # same files as twotower.load_vectors, read directly: importing yrec.twotower loads torch (~0.5 GB RSS)
+    # vectors written by twotower.py, read directly: importing yrec.twotower loads torch (~0.5 GB RSS)
     vs = {"tt": (np.load(Path(tt_dir, "user_vecs.npy")), np.load(Path(tt_dir, "item_vecs.npy")), None)}
     hist, n_users, n_items = sources.load(CUT)
 

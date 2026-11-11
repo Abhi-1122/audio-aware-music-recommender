@@ -1,4 +1,6 @@
+-- Step 3 of `python -m yrec.data build`, run once per cutoff ({cut} = A or AB); features for the ranker.
 -- User, track and user x artist features as of {cutoff}. Only events before the cutoff are used.
+-- Writes ufeat_{cut}.parquet, ifeat_{cut}.parquet and uartist_{cut}.parquet.
 
 COPY (
     WITH l AS (

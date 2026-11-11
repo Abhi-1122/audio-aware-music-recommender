@@ -1,7 +1,11 @@
-"""Two-tower retrieval: audio-aware item tower with ID dropout, history-pooling user tower.
+"""Two-tower retrieval source: audio-aware item tower with ID dropout, history-pooling user tower.
 
-PYTHONPATH=src python -m yrec.twotower --cutoff A --out artifacts/tt_A --eval
-PYTHONPATH=src torchrun --nproc_per_node=4 -m yrec.twotower --cutoff A --out artifacts/tt_A
+Trained on Listen+ events before a cutoff with sampled softmax (logQ correction, optional mined hard
+negatives). Writes item_vecs.npy, user_vecs.npy, model.pt and config.json to --out; retrieval.py reads
+the vectors. Runs after `make data` (and `make audio`, unless --no-audio).
+
+  PYTHONPATH=src python -m yrec.twotower --cutoff A --out artifacts/tt_A --eval
+  PYTHONPATH=src torchrun --nproc_per_node=4 -m yrec.twotower --cutoff A --out artifacts/tt_A
 """
 import argparse
 import json
@@ -18,7 +22,7 @@ import torch.nn.functional as F
 
 from yrec.data import CUTOFFS, PROC, WINDOWS
 
-D = 64
+D = 64  # embedding width of both towers
 
 
 class TwoTower(nn.Module):
@@ -126,11 +130,6 @@ def recall_at(user_vecs, item_vecs, win, k=100):
     tgt = win.groupby("uidx").item_idx.unique()
     _, top = index.search(user_vecs[tgt.index.values], k)
     return float(np.mean([len(set(t) & set(r)) / min(len(t), k) for t, r in zip(tgt.values, top)]))
-
-
-def load_vectors(out_dir):
-    out_dir = Path(out_dir)
-    return np.load(out_dir / "user_vecs.npy"), np.load(out_dir / "item_vecs.npy")
 
 
 def main():

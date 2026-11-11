@@ -3,6 +3,9 @@
 Train on cut A candidates labelled with the validation day (B), predict on cut AB candidates,
 keep the top 100 per user and evaluate on the test day (C).
 Graded labels: 0 = disliked in the window, 1 = no Listen+, 2 = Listen+, 3 = Listen+ and liked.
+Needs the candidates from `make retrieval`; writes artifacts/ranker_<view>.txt and results/stage2_<view>.json.
+
+  PYTHONPATH=src python -m yrec.ranker [--view all|discovery|both]
 """
 import argparse
 import json

@@ -1,5 +1,6 @@
+-- Step 2 of `python -m yrec.data build`, run once per cutoff ({cut} = A or AB).
 -- History before {cutoff} and labels for the window [{wstart}, {wend}) that follows it.
--- Nothing at or after {cutoff} feeds the history table.
+-- Nothing at or after {cutoff} feeds the history table. Writes hist_{cut}.parquet and tgt_{cut}.parquet.
 
 CREATE OR REPLACE TABLE hist AS
 WITH l AS (

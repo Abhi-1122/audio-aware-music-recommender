@@ -2,10 +2,11 @@
 
 Vector sources (two-tower, ALS, audio) are searched with exact FAISS inner-product search.
 Popularity is a fixed list and repeat is a lookup of the user's own history.
+Needs the two-tower vectors in artifacts/tt_<cut>; writes PROC/cand_<cut>_<view>.parquet and results/stage1_*.json.
 
-  python -m yrec.retrieval --cut A     # candidates for the ranker's training day
-  python -m yrec.retrieval --cut AB    # candidates for the test day + stage-1 results
-  python -m yrec.retrieval --eval-tt artifacts/tt_AB_nohn   # two-tower-only metrics (ablations)
+  PYTHONPATH=src python -m yrec.retrieval --cut A     # candidates for the ranker's training day
+  PYTHONPATH=src python -m yrec.retrieval --cut AB    # candidates for the test day + stage-1 results
+  PYTHONPATH=src python -m yrec.retrieval --eval-tt artifacts/tt_AB_nohn   # two-tower-only metrics (ablations)
 """
 import argparse
 import time
@@ -42,6 +43,7 @@ def exclusions(hist, view):
 
 
 def filtered(lists, users, excl, n):
+    """{uidx: first n items of the user's list that are not excluded}."""
     out = {}
     for u, row in zip(users, lists):
         row = row[~np.isin(row, excl[u])] if u in excl else row
@@ -163,6 +165,8 @@ if __name__ == "__main__":
     p.add_argument("--tt", help="two-tower output dir (default artifacts/tt_<cut>)")
     p.add_argument("--eval-tt", help="evaluate only this two-tower output dir on the test day")
     a = p.parse_args()
+    if not (a.cut or a.eval_tt):
+        p.error("pass --cut A|AB or --eval-tt DIR")
     if a.eval_tt:
         eval_tt(a.eval_tt)
     else:

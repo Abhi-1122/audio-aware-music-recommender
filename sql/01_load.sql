@@ -1,4 +1,7 @@
+-- Step 1 of `python -m yrec.data build` (run once; {raw}, {proc} are filled in by data.run_sql).
 -- Raw Yambda events -> typed tables with dense user / item / artist indices.
+-- Writes users.parquet and lp_events.parquet. The in-memory `listens`, `reactions` and `items` tables
+-- feed 02_split.sql, 03_features.sql and data.write_items (items.parquet).
 CREATE TABLE listens_raw AS SELECT * FROM read_parquet('{raw}/listens.parquet');
 
 CREATE TABLE reactions_raw AS
