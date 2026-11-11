@@ -38,6 +38,10 @@ def build():
         assert cutoff < wstart, "history must end before its label window starts"
         run_sql(con, "02_split.sql", cut=cut, cutoff=cutoff, wstart=wstart, wend=wend)
         run_sql(con, "03_features.sql", cut=cut, cutoff=cutoff)
+        # leakage guards: history ends before the cutoff, every labelled user has history
+        assert con.sql(f"SELECT max(last_ts) FROM '{PROC}/hist_{cut}.parquet'").fetchone()[0] < cutoff
+        assert con.sql(f"SELECT count(*) FROM '{PROC}/tgt_{cut}.parquet' WHERE uidx NOT IN "
+                       f"(SELECT uidx FROM '{PROC}/hist_{cut}.parquet')").fetchone()[0] == 0
         print(cut, con.sql(f"SELECT count(*), sum(lp::INT), sum((lp AND is_new)::INT) "
                            f"FROM '{PROC}/tgt_{cut}.parquet'").fetchone(), flush=True)
     write_items(con)
